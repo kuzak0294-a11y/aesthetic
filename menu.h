@@ -1,0 +1,684 @@
+﻿String chams[15];
+
+
+static config::ConfigList g_cfg_list = {};
+static bool g_list_loaded = false;
+static bool g_load_buttons[32] = {};
+
+void drawchams() {
+	chams[0] = language == 0 ? _(L"Type 1") : (language == 1 ? _(L"Тип 1") : _(L"第一类"));
+	chams[1] = language == 0 ? _(L"Type 2") : (language == 1 ? _(L"Тип 2") : _(L"第二类"));
+	chams[2] = language == 0 ? _(L"Type 3") : (language == 1 ? _(L"Тип 3") : _(L"第三类"));
+	chams[3] = language == 0 ? _(L"Type 4") : (language == 1 ? _(L"Тип 4") : _(L"类型4"));
+	chams[4] = language == 0 ? _(L"Type 5") : (language == 1 ? _(L"Тип 5") : _(L"类型5"));
+	chams[5] = language == 0 ? _(L"Type 6") : (language == 1 ? _(L"Тип 6") : _(L"类型6"));
+	chams[6] = language == 0 ? _(L"Type 7") : (language == 1 ? _(L"Тип 7") : _(L"类型7"));
+	chams[7] = language == 0 ? _(L"Type 8") : (language == 1 ? _(L"Тип 8") : _(L"类型8"));
+	chams[8] = language == 0 ? _(L"Type 9") : (language == 1 ? _(L"Тип 9") : _(L"类型9"));
+	chams[9] = language == 0 ? _(L"Type 10") : (language == 1 ? _(L"Тип 10") : _(L"类型10"));
+	chams[10] = language == 0 ? _(L"Type 11") : (language == 1 ? _(L"Тип 11") : _(L"类型11"));
+	chams[11] = language == 0 ? _(L"Type 12") : (language == 1 ? _(L"Тип 12") : _(L"类型12"));
+	chams[12] = language == 0 ? _(L"Type 13") : (language == 1 ? _(L"Тип 13") : _(L"类型13"));
+	chams[13] = language == 0 ? _(L"Type 14") : (language == 1 ? _(L"Тип 14") : _(L"类型14"));
+	chams[14] = language == 0 ? _(L"Type 15") : (language == 1 ? _(L"Тип 15") : _(L"类型15"));
+	u_elements::combobox(language == 0 ? _(L"Chams Type") : (language == 1 ? _(L"Вид Чамсов") : _(L"填充类型")), vars::localplayer::chams_type, chams, 15, 3);
+} 
+void menu() {
+	auto current = Event::current();
+	if (!current) {
+		crash_logger::log_error("Menu: Event::current() returned null");
+		return;
+	}
+
+
+	if (vars::misc::unload_cheat) {
+		crash_logger::shutdown();
+		FreeLibraryAndExitThread((HMODULE)g_base, 0);
+		return;
+	}
+
+	event_type = current->type();
+	active_key = current->keyCode();
+
+	if (event_type == EventType::KeyUp && active_key == KeyCode::End) {
+		menu_opened = !menu_opened;
+	}
+
+	if (event_type == EventType::Repaint || event_type == EventType::KeyUp || event_type == EventType::KeyDown)
+	{
+		u_elements::init();
+		u_elements::showanimation(menu_opened);
+
+		if (event_type == EventType::Repaint) {
+			entity_loop();
+		}
+
+		if (menu_alfa >= 3) {
+			u_elements::window(_(L"Aesthetic.Recode"), { 300, 300 }, { 790, 495 });
+			u_elements::elementanim();
+			u_elements::tab(_(L"COMBAT"), 0, { 45.2f, 20.f });
+			u_elements::tab(_(L"VISUALS"), 1, { 45.2f, 20.f });
+			u_elements::tab(_(L"LOCAL PLAYER"), 2, { 70.2f, 20.f });
+			u_elements::tab(_(L"WORLD"), 3, { 40.2f, 20.f });
+			u_elements::tab(_(L"MENU"), 4, { 37.f, 20.f });
+			switch (active_tab)
+			{
+			case 0:
+				u_elements::beginchild(language == 0 ? _(L"AIM SETTINGS") : (language == 1 ? _(L"НАСТРОЙКА АИМА") : _(L"瞄准设置")), { 15, 31 }, { 250,450 }, 1); {
+					u_elements::checkbox(language == 0 ? _(L"Perfect Silent") : (language == 1 ? _(L"Псало") : _(L"完美的沉默")), vars::psilent::psilent, vars::psilent::psilentkey);
+					u_elements::checkbox(language == 0 ? _(L"Draw Fov") : (language == 1 ? _(L"Рисовать Фов") : _(L"画圈")), vars::psilent::show_fov, u_elements::disable, vars::psilent::fov_color, 1);
+					u_elements::slider(language == 0 ? _(L"Fov Size") : (language == 1 ? _(L"Размер Фова") : _(L"圆形尺寸")), &vars::psilent::setter_fov, 0, 2000, 0);
+					{
+						String hitbone[] = { language == 0 ? _(L"Head") : (language == 1 ? _(L"Голова") : _(L"头")),
+							language == 0 ? _(L"Neck") : (language == 1 ? _(L"Шея") : _(L"颈部")),
+							language == 0 ? _(L"Chest") : (language == 1 ? _(L"Тело") : _(L"胸部")),
+							language == 0 ? _(L"Random") : (language == 1 ? _(L"Рандом") : _(L"随机的")) };
+						u_elements::combobox(language == 0 ? _(L"HitBone") : (language == 1 ? _(L"Попадать В") : _(L"N.打骨,打骨")), vars::psilent::HitBone, hitbone, 4, 0);
+					}
+
+
+
+
+					{
+						String ignore_players[] = { language == 0 ? _(L"Wounded") : (language == 1 ? _(L"Нокнутые") : _(L"受伤")),
+							language == 0 ? _(L"NPC") : (language == 1 ? _(L"Боты") : _(L"人大代表")),
+							language == 0 ? _(L"Safezone") : (language == 1 ? _(L"В Сейфзоне") : _(L"萨菲松")),
+							language == 0 ? _(L"Teammates") : (language == 1 ? _(L"Тиммейтов") : _(L"队友")),
+							language == 0 ? _(L"Sleeping") : (language == 1 ? _(L"Спящие") : _(L"睡觉")) };
+						u_elements::multicombobox(language == 0 ? _(L"Ignore Players's") : (language == 1 ? _(L"Игнорировать Игроков") : _(L"忽略玩家的")), vars::psilent::ignorepeople, ignore_players, 5, 1);
+					}
+				}
+				u_elements::endchild(language == 0 ? _(L"AIM SETTINGS") : (language == 1 ? _(L"НАСТРОЙКА АИМА") : _(L"瞄准设置")), { 15, 31 }, { 250,450 }, 1);
+
+				u_elements::beginchild(language == 0 ? _(L"WEAPON SETTINGS") : (language == 1 ? _(L"НАСТРОЙКА ОРУЖИЯ") : _(L"武器设置")), { 250 + 15 + 5, 31 }, { 250,450 }, 2); {
+					u_elements::checkbox(language == 0 ? _(L"Recoil Changer") : (language == 1 ? _(L"Изменить Разброс") : _(L"反冲更换器")), vars::weapon::norecoil);
+					if (vars::weapon::norecoil)
+					{
+						u_elements::slider(language == 0 ? _(L"Recoil X") : (language == 1 ? _(L"Разброс по X") : _(L"反冲X")), &vars::weapon::norecoil_value_x, 0.f, 100.f, 3);
+						u_elements::slider(language == 0 ? _(L"Recoil Y") : (language == 1 ? _(L"Разброс по Y") : _(L"反冲Y")), &vars::weapon::norecoil_value_y, 0.f, 100.f, 4);
+					}
+
+
+
+
+					u_elements::checkbox(language == 0 ? _(L"Thick Bullet") : (language == 1 ? _(L"Большой Хитбокс Пули") : _(L"厚子弹")), vars::weapon::thick_bullet);
+					if (vars::weapon::thick_bullet) {
+						u_elements::checkbox(language == 0 ? _(L"HitScan or Thick Bullet ") : (language == 1 ? _(L"Сканировать Позиции Телепорта") : _(L"希斯坎")), vars::bulletteleport::hitscan1);
+						u_elements::checkbox(language == 0 ? _(L"HitScan visualisation") : (language == 1 ? _(L"показ хитскана") : _(L"希斯坎")), vars::weapon::sphere_hitscan);
+						u_elements::checkbox(language == 0 ? _(L"Sphere") : (language == 1 ? _(L"Сфера радиуса") : _(L"厚子弹")), vars::weapon::sphere_RADIUS);
+						if (vars::weapon::thick_bullet)
+							u_elements::slider(language == 0 ? _(L"Bullet Hitbox Size") : (language == 1 ? _(L"Размер Хитбокса") : _(L"子弹击中箱尺寸")), &vars::weapon::bullet_hitbox_size, 0.1f, 0.6f, 2);
+						
+					}
+
+
+		/*			u_elements::checkbox(language == 0 ? _(L"Thick Bullet") : (language == 1 ? _(L"Большой Хитбокс Пули") : _(L"厚子弹")), vars::weapon::thick_bullet);
+					u_elements::checkbox(language == 0 ? _(L"HitScan or Thick Bullet ") : (language == 1 ? _(L"Сканировать Позиции Телепорта") : _(L"希斯坎")), vars::bulletteleport::hitscan1);
+					if (vars::weapon::thick_bullet)
+						u_elements::slider(language == 0 ? _(L"Bullet Hitbox Size") : (language == 1 ? _(L"Размер Хитбокса") : _(L"子弹击中箱尺寸")), &vars::weapon::bullet_hitbox_size, 0.1f, 0.6f, 2);
+					u_elements::checkbox(language == 0 ? _(L"Sphere") : (language == 1 ? _(L"Сфера радиуса") : _(L"厚子弹")), vars::weapon::sphere_RADIUS);*/
+
+
+
+
+
+
+
+
+					u_elements::checkbox(language == 0 ? _(L"No Spread") : (language == 1 ? _(L"Без Отдачи") : _(L"没有传播")), vars::weapon::nospread);
+					u_elements::checkbox(language == 0 ? _(L"Rapid Fire") : (language == 1 ? _(L"Быстрая Стрельба") : _(L"快速射击")), vars::weapon::rapidfire);
+					if (vars::weapon::rapidfire)
+						u_elements::slider(language == 0 ? _(L"Fire Rate") : (language == 1 ? _(L"Скорость Стрельбы") : _(L"射速")), &vars::weapon::rapidfire_speed, 0.1f, 10.0f, 35);
+					u_elements::checkbox(language == 0 ? _(L"Instant Eoka") : (language == 1 ? _(L"Быстрый Выстрел Еоки") : _(L"即时Eoka")), vars::weapon::eokachance);
+
+					u_elements::checkbox(language == 0 ? _(L"Always Automatic") : (language == 1 ? _(L"Автоматик") : _(L"总是自动的")), vars::weapon::automatic);
+					u_elements::checkbox(language == 0 ? _(L"Change Bullet Size") : (language == 1 ? _(L"Изменить Модель Пули") : _(L"更改项目符号大小")), vars::weapon::bullet_resize);
+					if (vars::weapon::bullet_resize)
+						u_elements::slider(language == 0 ? _(L"Bullet Size") : (language == 1 ? _(L"Размер Модели") : _(L"子弹尺寸")), &vars::weapon::bullet_size, 0, 100, 5);
+					/*u_elements::checkbox(language == 0 ? _(L"Thick Bullet") : (language == 1 ? _(L"Большой Хитбокс Пули") : _(L"厚子弹")), vars::weapon::thick_bullet);
+					u_elements::checkbox(language == 0 ? _(L"HitScan or Thick Bullet ") : (language == 1 ? _(L"Сканировать Позиции Телепорта") : _(L"希斯坎")), vars::bulletteleport::hitscan1);
+					if (vars::weapon::thick_bullet)
+						u_elements::slider(language == 0 ? _(L"Bullet Hitbox Size") : (language == 1 ? _(L"Размер Хитбокса") : _(L"子弹击中箱尺寸")), &vars::weapon::bullet_hitbox_size, 0.1f, 0.6f, 2);
+					u_elements::checkbox(language == 0 ? _(L"Sphere") : (language == 1 ? _(L"Сфера радиуса") : _(L"厚子弹")), vars::weapon::sphere_RADIUS);*/
+
+					u_elements::checkbox(language == 0 ? _(L"Change Bullet Speed") : (language == 1 ? _(L"ИЗменить Скорость Пули") : _(L"改变子弹速度")), vars::weapon::changebulletspeed);
+					if (vars::weapon::changebulletspeed)
+						u_elements::slider(language == 0 ? _(L"Bullet Speed") : (language == 1 ? _(L"Скорость Пули") : _(L"子弹速度")), &vars::weapon::bulletspeed, 0.1f, 1.5f, 6);
+					u_elements::checkbox(language == 0 ? _(L"Resource Hotspot") : (language == 1 ? _(L"Бить По Лучшим Точкам") : _(L"资源热点")), vars::weapon::alwayshotspot);
+					u_elements::checkbox(language == 0 ? _(L"Attack On Mountables") : (language == 1 ? _(L"Держать Оружие Всегда") : _(L"攻击可安装")), vars::misc::attack_on_mountables);
+					u_elements::checkbox(language == 0 ? _(L"Weapon Spam") : (language == 1 ? _(L"Фейковые Выстрелы") : _(L"武器垃圾邮件")), vars::weapon::weaponspam, vars::weapon::weaponspam_key);
+					if (vars::weapon::weaponspam)
+						u_elements::slider(language == 0 ? _(L"Weapon Spam Delay") : (language == 1 ? _(L"Ждать перед выстрелом") : _(L"武器垃圾邮件延迟")), &vars::weapon::weaponspam_delay, 0.f, 20.f, 7);
+				}
+				u_elements::endchild(language == 0 ? _(L"WEAPON SETTINGS") : (language == 1 ? _(L"НАСТРОЙКА ОРУЖИЯ") : _(L"武器设置")), { 250 + 15 + 5, 31 }, { 250,450 }, 2);
+				u_elements::beginchild(language == 0 ? _(L"RAGE SETTINGS") : (language == 1 ? _(L"РЕЙДЖ НАСТРОЙКИ") : _(L"愤怒设置")), { 250 + 250 + 15 + 5 + 5, 31 }, { 250,450 }, 3); {
+
+					u_elements::checkbox(language == 0 ? _(L"Manipulator") : (language == 1 ? _(L"Манипулятор") : _(L"机械手")), vars::manipulator::manipulator, vars::manipulator::manipulatorkey);
+					if (vars::manipulator::manipulator)
+					{
+						u_elements::slider(language == 0 ? _(L"Max Manipulator Angle") : (language == 1 ? _(L"Количество Точек Сканирования") : _(L"最大操纵角度")), &vars::manipulator::maxangle, 0.f, 30.f, 8, true);
+						u_elements::checkbox(language == 0 ? _(L"Manipulator Indicator") : (language == 1 ? _(L"Индикатор Манипулятора") : _(L"机械手指示器")), vars::manipulator::manipulatorind);
+						u_elements::checkbox(language == 0 ? _(L"Auto Stop") : (language == 1 ? _(L"Останавливать игрока") : _(L"自动停止")), vars::manipulator::stopo);
+						u_elements::slider(language == 0 ? _(L"Max Desync") : (language == 1 ? _(L"Максимальный десинк") : _(L"最大Desync")), &vars::psilent::lags, 0, 10, 20);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Bullet Teleport") : (language == 1 ? _(L"Телепорт Пули") : _(L"子弹传送")), vars::bulletteleport::tp_bullet);
+					if (vars::bulletteleport::tp_bullet)
+					{
+						u_elements::checkbox(language == 0 ? _(L"HitScan") : (language == 1 ? _(L"Сканировать Позиции Телепорта") : _(L"希斯坎")), vars::bulletteleport::hitscan);
+						if (vars::bulletteleport::hitscan)
+							
+						    u_elements::checkbox(language == 0 ? _(L"HitScan visualisation") : (language == 1 ? _(L"показ хитскана") : _(L"希斯坎")), vars::weapon::sphere_hitscan1);
+						u_elements::slider(language == 0 ? _(L"Max Bullet Teleport Angle") : (language == 1 ? _(L"Количество Точек Сканирования") : _(L"最大子弹传送角度")), & vars::bulletteleport::maxangle, 0.f, 30.f, 9, true);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Bullet Teleport In Heli") : (language == 1 ? _(L"Телепорт Пули В Военный Вертолёт") : _(L"直升机中的子弹传送")), vars::bulletteleport::tp_heli_bullet);
+					u_elements::checkbox(language == 0 ? _(L"Projectile Skip") : (language == 1 ? _(L"Пропускать Траекторию Пули") : _(L"弹丸跳过")), vars::weapon::projectile_skip);
+					u_elements::checkbox(language == 0 ? _(L"Insta Kill") : (language == 1 ? _(L"Быстрый Выстрел") : _(L"强力射击")), vars::weapon::instakill);
+			u_elements::checkbox(language == 0 ? _(L"Instant Hit") : (language == 1 ? _(L"Мгновенный Выстрел") : _(L"瞬间命中")), vars::weapon::instant_hit);
+					u_elements::checkbox(language == 0 ? _(L"Pierce Materials") : (language == 1 ? _(L"Прострел Сквозь Объекты") : _(L"穿孔材料")), vars::weapon::piercematerials);
+					u_elements::checkbox(language == 0 ? _(L"STW (Shoot Through Walls)") : (language == 1 ? _(L"STW (Прострел Сквозь Стены)") : _(L"STW(穿墙射击)")), vars::weapon::stw_enabled, vars::weapon::stw_key);
+					if (vars::weapon::stw_enabled) {
+						u_elements::slider(language == 0 ? _(L"STW Max Distance") : (language == 1 ? _(L"Максимальная Дистанция STW") : _(L"STW最大距离")), &vars::weapon::stw_max_distance, 10.f, 300.f, 33);
+						u_elements::checkbox(language == 0 ? _(L"STW Indicator") : (language == 1 ? _(L"Индикатор STW") : _(L"STW指示器")), vars::weapon::stw_indicator);
+					}
+
+					u_elements::checkbox(language == 0 ? _(L"Jump Shoot") : (language == 1 ? _(L"Стрелять В Прыжке") : _(L"跳射击")), vars::misc::always_shoot);
+					u_elements::checkbox(language == 0 ? _(L"Hamer Draw") : (language == 1 ? _(L"Рисовать Киянкой") : _(L"哈默抽签")), vars::weapon::hamerdraw);
+				}
+				u_elements::endchild(language == 0 ? _(L"RAGE SETTINGS") : (language == 1 ? _(L"РЕЙДЖ НАСТРОЙКИ") : _(L"愤怒设置")), { 250 + 250 + 15 + 5 + 5, 31 }, { 250,450 }, 3);
+				break;
+			case 1:
+				u_elements::beginchild(language == 0 ? _(L"PLAYERS") : (language == 1 ? _(L"ИГРОКИ") : _(L"球员")), { 15, 31 }, { 250,450 }, 3); {
+					u_elements::checkbox(language == 0 ? _(L"Player Name") : (language == 1 ? _(L"Имя") : _(L"球员姓名")), vars::esp::name, u_elements::disable, vars::esp::namecolor, 3);
+					u_elements::checkbox(_(L"Player Skeleton"), vars::esp::skeleton, u_elements::disable, vars::esp::skeletoncolor, 4);
+					u_elements::checkbox(language == 0 ? _(L"Player Box") : (language == 1 ? _(L"Квадрат") : _(L"播放器盒")), vars::esp::box, u_elements::disable, vars::esp::boxcolor, 5);
+					if (vars::esp::box)
+					{
+						String hitbone[] = { language == 0 ? _(L"Classic") : (language == 1 ? _(L"Классический") : _(L"经典作品")),
+							language == 0 ? _(L"Corner") : (language == 1 ? _(L"Корнер") : _(L"角落")) };
+						u_elements::combobox(language == 0 ? _(L"Box Mode") : (language == 1 ? _(L"Вид Квадратика") : _(L"盒子模式")), vars::esp::box_mode, hitbone, 2, 0);
+					}
+					u_elements::checkbox(_(L"Player Healthbar"), vars::esp::healthbar);
+					u_elements::checkbox(language == 0 ? _(L"Player Weapon") : (language == 1 ? _(L"Оружие") : _(L"玩家武器")), vars::esp::weapon, u_elements::disable, vars::esp::weaponcolor, 6);
+					u_elements::checkbox(language == 0 ? _(L"Player Distance") : (language == 1 ? _(L"Дистанция") : _(L"玩家距离")), vars::esp::distance, u_elements::disable, vars::esp::distancecolor, 7);
+					u_elements::checkbox(language == 0 ? _(L"Player Look Direction") : (language == 1 ? _(L"Линия Смотра") : _(L"玩家看方向")), vars::esp::looking_direction, u_elements::disable, vars::esp::looking_directioncolor, 8);
+					u_elements::checkbox(language == 0 ? _(L"Player Flag") : (language == 1 ? _(L"Флаги Игроков") : _(L"球员旗帜")), vars::esp::flags, u_elements::disable, vars::esp::flagscolor, 9);
+					{
+						String show_set[] = { language == 0 ? _(L"Show Players") : (language == 1 ? _(L"Видеть Игроков") : _(L"显示玩家")),
+							language == 0 ? _(L"Show NPC") : (language == 1 ? _(L"Видеть Ботов") : _(L"显示机器人")),
+							language == 0 ? _(L"Show Wounded") : (language == 1 ? _(L"Видеть Нокнутых") : _(L"显示受伤")),
+							language == 0 ? _(L"Show Safezone") : (language == 1 ? _(L"Видеть Сейфзону") : _(L"显示安全区")),
+							language == 0 ? _(L"Show Teammates") : (language == 1 ? _(L"Видеть Тиммейтов") : _(L"显示队友")),
+							language == 0 ? _(L"Show Sleeping") : (language == 1 ? _(L"Видеть Спящих") : _(L"显示睡眠")),
+							language == 0 ? _(L"Show The Deceased") : (language == 1 ? _(L"Видеть Умерших") : _(L"显示死者")), };
+						u_elements::multicombobox(language == 0 ? _(L"Show Settings") : (language == 1 ? _(L"Настройки Отображения") : _(L"显示设置")), vars::esp::show_choose, show_set, 7, 1);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Radar") : (language == 1 ? _(L"Радар") : _(L"雷达")), vars::esp::radar);
+					if (vars::esp::radar) {
+						u_elements::slider(language == 0 ? _(L"Radar Size") : (language == 1 ? _(L"Размер Радара") : _(L"雷达尺寸")), &vars::esp::radar_size, 0.f, 150.f, 10);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Out Of Fov Arrows") : (language == 1 ? _(L"OOF Индикаторы") : _(L"出Fov箭头")), vars::esp::oofindicators);
+					u_elements::checkbox(language == 0 ? _(L"ESP Outline") : (language == 1 ? _(L"Обводка Визуалов") : _(L"视觉轮廓")), vars::esp::outline);
+					u_elements::checkbox(language == 0 ? _(L"Player Chams") : (language == 1 ? _(L"Чамсы На Игроков") : _(L"玩家填充")), vars::esp::player_chams);
+					if (vars::esp::player_chams) {
+						String chams_types[] = { 
+							language == 0 ? _(L"Rainbow") : (language == 1 ? _(L"Радужный") : _(L"彩虹")),
+							language == 0 ? _(L"Flat") : (language == 1 ? _(L"Плоский") : _(L"平坦")),
+							language == 0 ? _(L"has") : (language == 1 ? _(L"has") : _(L"平坦"))
+						
+						};
+						u_elements::combobox(language == 0 ? _(L"Chams Type") : (language == 1 ? _(L"Тип Чамсов") : _(L"填充类型")), vars::esp::player_chams_type, chams_types, 3, 5);
+						u_elements::slider(language == 0 ? _(L"Chams Alpha") : (language == 1 ? _(L"Яркость Чамсов") : _(L"填充亮度")), &vars::esp::player_chams_alpha, 0.0f, 1.0f, 15);
+						if (vars::esp::player_chams_type == 0) {
+							u_elements::slider(language == 0 ? _(L"Rainbow Speed") : (language == 1 ? _(L"Скорость Радуги") : _(L"彩虹速度")), &vars::esp::player_chams_rainbow_speed, 0.1f, 10.0f, 18);
+						}
+						u_elements::checkbox(language == 0 ? _(L"Visible Color") : (language == 1 ? _(L"Цвет Видимых") : _(L"可见颜色")), vars::esp::player_chams, u_elements::disable, vars::esp::player_chams_visible_color, 16);
+						u_elements::checkbox(language == 0 ? _(L"Invisible Color") : (language == 1 ? _(L"Цвет Невидимых") : _(L"不可见颜色")), vars::esp::player_chams, u_elements::disable, vars::esp::player_chams_invisible_color, 17);
+					}
+				}
+				u_elements::endchild(language == 0 ? _(L"PLAYERS") : (language == 1 ? _(L"ИГРОКИ") : _(L"球员")), { 15, 31 }, { 250,450 }, 3);
+				u_elements::beginchild(language == 0 ? _(L"INDICATORS & TRACERS") : (language == 1 ? _(L"ИНДИКАТОРЫ & ТРАЙСЕРА") : _(L"指示器和示踪剂")), { 250 + 15 + 5, 31 }, { 250,450 }, 4); {
+					u_elements::checkbox(language == 0 ? _(L"FlyHack Indicator") : (language == 1 ? _(L"Флайхак Индикатор") : _(L"飞黑客指示器")), vars::antihack::flyhackindicator);
+					u_elements::checkbox(language == 0 ? _(L"SpeedHack Indicator") : (language == 1 ? _(L"Спидхак Индикатор") : _(L"速度黑客指示器")), vars::antihack::speedhackindicator);
+					u_elements::checkbox(language == 0 ? _(L"Looking Alert") : (language == 1 ? _(L"Уведомление Смотра") : _(L"寻找警报")), vars::misc::look_allert);
+					u_elements::checkbox(language == 0 ? _(L"Raycast Sphere") : (language == 1 ? _(L"Сфера По Центру") : _(L"射线投射球")), vars::misc::raycast_sphere, u_elements::disable, vars::misc::raycast_sphere_color, 10);
+					u_elements::checkbox(language == 0 ? _(L"Auto Reload Indicator") : (language == 1 ? _(L"Индикатор Перезарядки") : _(L"自动重新加载指示器")), vars::weapon::autoreloadindicator);
+					u_elements::checkbox(language == 0 ? _(L"Movement Line") : (language == 1 ? _(L"Линия Движения") : _(L"运动线")), vars::trasers::movement_line, u_elements::disable, vars::trasers::movement_line_color, 11);
+					if (vars::trasers::movement_line)
+					{
+						u_elements::slider(language == 0 ? _(L"Movement Line Time") : (language == 1 ? _(L"Время Отображения Линии") : _(L"运动线时间")), &vars::trasers::movement_line_time, 0, 4, 11);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Bullet Line") : (language == 1 ? _(L"Линия Пули") : _(L"子弹追踪器")), vars::trasers::bullet_tracers, u_elements::disable, vars::trasers::bullet_tracers_color, 12);
+					if (vars::trasers::bullet_tracers)
+					{
+						u_elements::slider(language == 0 ? _(L"Bullet Line Time") : (language == 1 ? _(L"Время Отображения Линии") : _(L"子弹追踪时间")), &vars::trasers::bullet_tracers_time, 0.f, 4.f, 12);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Target Line") : (language == 1 ? _(L"Линия До Таргета") : _(L"目标线")), vars::psilent::target_line, u_elements::disable, vars::psilent::target_line_color, 2);
+					u_elements::checkbox(language == 0 ? _(L"Target Belt") : (language == 1 ? _(L"Инвентарь Таргета") : _(L"目标带")), vars::psilent::target_belt);
+					if (vars::psilent::target_belt) {
+						u_elements::slider(language == 0 ? _(L"Target Belt Size") : (language == 1 ? _(L"Размер Инвентаря") : _(L"目标带大小")), &vars::psilent::target_belt_size, 30.f, 100.f, 32);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Weapon Chams") : (language == 1 ? _(L"Чамсы На Оружие") : _(L"武器袋")), vars::localplayer::chams);
+					if (vars::localplayer::chams) {
+						drawchams();
+					}
+					u_elements::checkbox(language == 0 ? _(L"Kill Effect") : (language == 1 ? _(L"Эффект Убийства") : _(L"杀戮效果")), vars::esp::kill_effect);
+					if (vars::esp::kill_effect) {
+						String effect_types[] = { 
+							language == 0 ? _(L"Souls Escape") : (language == 1 ? _(L"Души Улетают") : _(L"灵魂逃脱")),
+							language == 0 ? _(L"Souls Escape (Omni)") : (language == 1 ? _(L"Души Улетают (Омни)") : _(L"灵魂逃脱(全向)"))
+						};
+						u_elements::combobox(language == 0 ? _(L"Effect Type") : (language == 1 ? _(L"Тип Эффекта") : _(L"效果类型")), vars::esp::kill_effect_type, effect_types, 2, 4);
+					}
+					//u_elements::checkbox(_(L"Thirdperson Changer"), vars::misc::thirdperson_changer);
+					//if (vars::misc::thirdperson_changer) {
+					//	u_elements::slider(_(L"Thirdperson Dist"), &vars::misc::th_dist, 1, 20, 9);
+					//	u_elements::slider(_(L"Thirdperson FOV"), &vars::misc::th_fov, 70, 90, 10);
+					//}
+
+				}
+				u_elements::endchild(language == 0 ? _(L"INDICATORS & TRACERS") : (language == 1 ? _(L"ИНДИКАТОРЫ & ТРАЙСЕРА") : _(L"指示器和示踪剂")), { 250 + 15 + 5, 31 }, { 250,450 }, 4);
+				u_elements::beginchild(language == 0 ? _(L"SKYBOX") : (language == 1 ? _(L"НЕБО") : _(L"天空盒")), { 250 + 250 + 15 + 5 + 5, 31 }, { 250,450 }, 5); {
+					u_elements::checkbox(language == 0 ? _(L"Mie Changer") : (language == 1 ? _(L"Изменение Свечения") : _(L"Mie变换器")), vars::misc::mie_changer);
+					if (vars::misc::mie_changer) {
+						u_elements::slider(language == 0 ? _(L"Mie Amount") : (language == 1 ? _(L"Свечение") : _(L"Mie金额")), &vars::misc::mie, 0, 100, 15);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Sky Color Changer") : (language == 1 ? _(L"Изменение Цвета Неба") : _(L"天空换色器")), vars::misc::sky_color_changer, u_elements::disable, vars::misc::sky_color, 13);
+					u_elements::checkbox(language == 0 ? _(L"Stars Changer") : (language == 1 ? _(L"Изменение Звёзд") : _(L"星变器")), vars::misc::stars_changer);
+					if (vars::misc::stars_changer) {
+						u_elements::slider(language == 0 ? _(L"Stars Amount") : (language == 1 ? _(L"Количество") : _(L"星星数量")), &vars::misc::stars_amount, 0, 40000, 16);
+						u_elements::slider(language == 0 ? _(L"Stars Size") : (language == 1 ? _(L"Размер") : _(L"星星大小")), &vars::misc::stars_size, 0, 40, 17);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Rayleigh Changer") : (language == 1 ? _(L"Изменение Переливания") : _(L"瑞利变换器")), vars::misc::rayleigh_changer);
+					if (vars::misc::rayleigh_changer) {
+						u_elements::slider(language == 0 ? _(L"Rayleigh Amount") : (language == 1 ? _(L"Переливание") : _(L"瑞利金额")), &vars::misc::rayleigh, 0, 100, 18);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Brightness Changer") : (language == 1 ? _(L"Изменение Яркости") : _(L"亮度变换器")), vars::misc::brightness_changer);
+					if (vars::misc::brightness_changer) {
+						u_elements::slider(language == 0 ? _(L"Brightness Amount") : (language == 1 ? _(L"Яркость") : _(L"亮度量")), &vars::misc::brightness, 0, 100, 19);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Time Changer") : (language == 1 ? _(L"Изменение Времени") : _(L"时间变换器")), vars::misc::time_changer);
+					if (vars::misc::time_changer) {
+						u_elements::slider(language == 0 ? _(L"Time Amount") : (language == 1 ? _(L"Время") : _(L"时间金额")), &vars::misc::time_amount, 0, 12, 20);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Bright Ambient") : (language == 1 ? _(L"Изменение Цвета Земли") : _(L"明亮的环境")), vars::misc::ambient_changer, u_elements::disable, vars::misc::ambient_color, 14);
+
+					u_elements::checkbox(language == 0 ? _(L"Atmosphere Contrast") : (language == 1 ? _(L"Контраст Атмосферы") : _(L"大气对比")), vars::misc::atmospherecontrast);
+					u_elements::checkbox(language == 0 ? _(L"No Fog") : (language == 1 ? _(L"Убрать Туман") : _(L"无雾")), vars::misc::nofog);
+					u_elements::checkbox(language == 0 ? _(L"No Rain") : (language == 1 ? _(L"Убрать Дождь") : _(L"没有雨")), vars::misc::norain);
+					u_elements::checkbox(language == 0 ? _(L"No Wind") : (language == 1 ? _(L"Убрать Ветер") : _(L"没有风")), vars::misc::nowind);
+					u_elements::checkbox(language == 0 ? _(L"No Clouds") : (language == 1 ? _(L"Убрать Облака") : _(L"没有云")), vars::misc::noclouds);
+					u_elements::checkbox(language == 0 ? _(L"No Thunder") : (language == 1 ? _(L"Убрать Гром") : _(L"没有雷声")), vars::misc::nothunder);
+					u_elements::checkbox(language == 0 ? _(L"Bright Cave") : (language == 1 ? _(L"Убрать Затемнение В Пещере") : _(L"明亮的洞穴")), vars::misc::brightcave);
+				}
+				u_elements::endchild(language == 0 ? _(L"SKYBOX") : (language == 1 ? _(L"НЕБО") : _(L"天空盒")), { 250 + 250 + 15 + 5 + 5, 31 }, { 250,450 }, 5);
+				break;
+			case 2:
+				u_elements::beginchild(language == 0 ? _(L"MOVEMENT") : (language == 1 ? _(L"ДВИЖЕНИЕ") : _(L"运动")), { 15, 31 }, { 250,450 }, 6); {
+					u_elements::checkbox(language == 0 ? _(L"Spider Man") : (language == 1 ? _(L"Лазанье По Стенам") : _(L"蜘蛛侠")), vars::misc::spider);
+					u_elements::checkbox(language == 0 ? _(L"No Fall Damage") : (language == 1 ? _(L"Убрать Дамаг От Падения") : _(L"无坠落伤害")), vars::misc::no_fall_damage);
+					u_elements::checkbox(language == 0 ? _(L"Always Sprint") : (language == 1 ? _(L"Всегда Бежать") : _(L"总是冲刺")), vars::misc::always_sprint);
+					u_elements::checkbox(language == 0 ? _(L"Infinity Jump") : (language == 1 ? _(L"Бесконечный Прыжок") : _(L"无限跳跃")), vars::misc::inf_jump);
+					u_elements::checkbox(language == 0 ? _(L"Interactive Debug") : (language == 1 ? _(L"Полёт") : _(L"交互式调试")), vars::misc::interactivedebug, vars::misc::interactivedebugkey);
+					if (vars::misc::interactivedebug)
+						u_elements::slider(language == 0 ? _(L"Interactive Fly Speed") : (language == 1 ? _(L"Скорость Полёта") : _(L"互动飞行速度")), &vars::misc::interactivedebug_speed, 0, 10, 21);
+					u_elements::checkbox(language == 0 ? _(L"Bhop") : (language == 1 ? _(L"Авто Прыжки") : _(L"博普")), vars::misc::bhop, vars::misc::bhopkey);
+					u_elements::checkbox(language == 0 ? _(L"Gravity") : (language == 1 ? _(L"Гравитация") : _(L"重力")), vars::misc::gravity);
+					if (vars::misc::gravity)
+						u_elements::slider(language == 0 ? _(L"Gravity Value") : (language == 1 ? _(L"Притяжение") : _(L"重力值")), &vars::misc::gravity_value, 0, 3, 22);
+					u_elements::checkbox(language == 0 ? _(L"Teleport to Head") : (language == 1 ? _(L"Телепорт На Голову") : _(L"传送到头部")), vars::misc::teleport_to_head, vars::misc::teleport_to_headkey);
+					u_elements::checkbox(language == 0 ? _(L"SpeedHack") : (language == 1 ? _(L"Быстрый Бег") : _(L"快车道")), vars::misc::speedhack, vars::misc::speedhackkey);
+					if (vars::misc::speedhack) {
+						u_elements::slider(language == 0 ? _(L"SpeedHack Amount") : (language == 1 ? _(L"Скорость") : _(L"SpeedHack金额")), &vars::misc::speedhackspeed, 0, 10, 0);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Fake Lag") : (language == 1 ? _(L"Фейк Лаги") : _(L"假滞后")), vars::misc::fakelag, vars::misc::fakelag_key);
+					if (vars::misc::fakelag) {
+						u_elements::slider(language == 0 ? _(L"Fake Lag Ticks") : (language == 1 ? _(L"Количество Тиков") : _(L"假滞后刻度")), &vars::misc::fakelag_ticks, 1, 14, 36);
+						u_elements::checkbox(language == 0 ? _(L"Fake Lag Indicator") : (language == 1 ? _(L"Индикатор Фейк Лага") : _(L"假滞后指示器")), vars::misc::fakelag_indicator);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Anti-Aim") : (language == 1 ? _(L"Анти-Аим") : _(L"反瞄准")), vars::misc::antiaim);
+					if (vars::misc::antiaim) {
+						String anti_aim[] = { (_(L"backwards")), (_(L"backwards (down)")), (_(L"backwards (up)")), (_(L"left")), (_(L"left (down)")), (_(L"right")), (_(L"right (down)")),
+							(_(L"jitter")), (_(L"jitter (down)")), (_(L"jitter (up)")), (_(L"spin")), (_(L"spin (down)")), (_(L"spin (up)")), (_(L"random")) };
+						u_elements::combobox(language == 0 ? _(L"Anti-aim Mode") : (language == 1 ? _(L"Режим Анти-Аима") : _(L"反瞄准模式")), vars::misc::antiaim_mode, anti_aim, 14, 3);
+						if (vars::misc::antiaim_mode == 10 || vars::misc::antiaim_mode == 11 || vars::misc::antiaim_mode == 12)
+							u_elements::slider(language == 0 ? _(L"Spin Speed") : (language == 1 ? _(L"Скорость Вращения") : _(L"旋转速度")), &vars::misc::spinspeed, 0, 50, 18);
+					}
+				}
+				u_elements::endchild(language == 0 ? _(L"MOVEMENT") : (language == 1 ? _(L"ДВИЖЕНИЕ") : _(L"运动")), { 15, 31 }, { 250,450 }, 6);
+				u_elements::beginchild(language == 0 ? _(L"AUTOMATIC") : (language == 1 ? _(L"АВТОМАТИК") : _(L"自动的")), { 250 + 15 + 5, 31 }, { 250,450 }, 7); {
+					u_elements::checkbox(language == 0 ? _(L"Auto Heal") : (language == 1 ? _(L"Авто Лечение") : _(L"自动治疗")), vars::localplayer::autoheal);
+					u_elements::checkbox(language == 0 ? _(L"Silent Collectible") : (language == 1 ? _(L"Поднимать Всё Вокруг") : _(L"无声收藏品")), vars::localplayer::silentcollectiblet);
+					u_elements::checkbox(language == 0 ? _(L"Door Spammer") : (language == 1 ? _(L"Бить В Двери") : _(L"门垃圾邮件发送者")), vars::localplayer::doorspammer);
+					//u_elements::checkbox(language == 0 ? _(L"Silent Stash") : (language == 1 ? _(L"Лутать Стэши") : _(L"无声藏匿处")), vars::localplayer::silentstash);
+					u_elements::checkbox(language == 0 ? _(L"Silent Turret") : (language == 1 ? _(L"Выключать Туррели") : _(L"静音炮塔")), vars::localplayer::silentturret);
+					u_elements::checkbox(language == 0 ? _(L"Stop Recycler") : (language == 1 ? _(L"Останавливать Переработчик") : _(L"停止回收")), vars::localplayer::stoprecycler);
+					u_elements::checkbox(language == 0 ? _(L"Auto Reload") : (language == 1 ? _(L"Авто Перезарядка") : _(L"自动重新加载")), vars::weapon::autoreload);
+					u_elements::checkbox(language == 0 ? _(L"Auto Farm Ore") : (language == 1 ? _(L"Автоматически Добывать Камень") : _(L"汽车农场矿石")), vars::weapon::autofarmore);
+					u_elements::checkbox(language == 0 ? _(L"Auto Farm Tree") : (language == 1 ? _(L"Автоматически Добывать Дерево") : _(L"汽车农场树")), vars::weapon::autofarmtree);
+					u_elements::checkbox(language == 0 ? _(L"Auto Upgrade") : (language == 1 ? _(L"Автоматически Улучшать") : _(L"自动升级")), vars::localplayer::auto_upgrade);
+					if (vars::localplayer::auto_upgrade) {
+						String upgrade[] = { language == 0 ? _(L"Wood") : (language == 1 ? _(L"Дерево") : _(L"木材")),
+							language == 0 ? _(L"Stone") : (language == 1 ? _(L"Камень") : _(L"石头")),
+							language == 0 ? _(L"Metal") : (language == 1 ? _(L"Метал") : _(L"金属")),
+							language == 0 ? _(L"HQM") : (language == 1 ? _(L"МВК") : _(L"HQM")) };
+						u_elements::combobox(language == 0 ? _(L"BuildingGrade") : (language == 1 ? _(L"Улучшать В") : _(L"建筑工程")), vars::localplayer::upgrade, upgrade, 4, 3);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Gesture Spam") : (language == 1 ? _(L"Использовать Эмоции") : _(L"手势垃圾邮件")), vars::localplayer::gesture_spam);
+					if (vars::localplayer::gesture_spam) {
+						String gesture[] = { language == 0 ? _(L"Clap") : (language == 1 ? _(L"Хлопать") : _(L"拍手,拍手")),
+							language == 0 ? _(L"Friendly") : (language == 1 ? _(L"Махать Рукой") : _(L"友好的")),
+							language == 0 ? _(L"ThumbsDown") : (language == 1 ? _(L"Палец Вниз") : _(L"拇指向下")),
+							language == 0 ? _(L"ThumbsUp") : (language == 1 ? _(L"Палец Вверх") : _(L"大拇指,大拇指")),
+							language == 0 ? _(L"Ok") : (language == 1 ? _(L"Ок") : _(L"好的")),
+							language == 0 ? _(L"Point") : (language == 1 ? _(L"Указать") : _(L"点")),
+							language == 0 ? _(L"Shrug") : (language == 1 ? _(L"Пожимать Плечами") : _(L"耸耸肩")),
+							language == 0 ? _(L"Victory") : (language == 1 ? _(L"Победа") : _(L"胜利")),
+							language == 0 ? _(L"Wave") : (language == 1 ? _(L"Волна") : _(L"波浪")) };
+						u_elements::combobox(language == 0 ? _(L"Gesture") : (language == 1 ? _(L"Эмоция") : _(L"手势")), vars::localplayer::gesture, gesture, 9, 3);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Auto Refill Jackhammer") : (language == 1 ? _(L"Чинить Бур") : _(L"自动填充手提钻")), vars::localplayer::autorefill);
+					u_elements::checkbox(language == 0 ? _(L"Fast Loot") : (language == 1 ? _(L"Быстро Лутать") : _(L"快速战利品")), vars::misc::fastloot);
+					u_elements::checkbox(language == 0 ? _(L"Mass Suicide") : (language == 1 ? _(L"Умиреть") : _(L"大规模自杀")), vars::localplayer::suicide, vars::localplayer::suicidekey);
+					u_elements::checkbox(language == 0 ? _(L"Silent Melee") : (language == 1 ? _(L"Бить Ближайшего Игрока") : _(L"无声混战")), vars::weapon::silent_melee);
+					if (vars::weapon::silent_melee)
+						u_elements::checkbox(language == 0 ? _(L"Show Melee Radius") : (language == 1 ? _(L"Видить Радиус Битья") : _(L"显示近战半径")), vars::weapon::show_silent_radius);
+					//u_elements::checkbox(_(L"Farm Bot"), vars::misc::farmbot);
+				}
+				u_elements::endchild(language == 0 ? _(L"AUTOMATIC") : (language == 1 ? _(L"АВТОМАТИК") : _(L"自动的")), { 250 + 15 + 5, 31 }, { 250,450 }, 7);
+				u_elements::beginchild(language == 0 ? _(L"OTHER") : (language == 1 ? _(L"ПРОЧЕЕ") : _(L"其他")), { 250 + 250 + 15 + 5 + 5, 31 }, { 250,450 }, 8); {
+					u_elements::checkbox(language == 0 ? _(L"Admin Mode") : (language == 1 ? _(L"Фейк Админ") : _(L"管理模式")), vars::misc::admin_mode);
+					u_elements::checkbox(language == 0 ? _(L"Name Spoofer") : (language == 1 ? _(L"Изменить Ник") : _(L"名称欺骗者")), vars::misc::namespoofer);
+					if (vars::misc::namespoofer) {
+						u_elements::checkbox(language == 0 ? _(L"Random Nick") : (language == 1 ? _(L"Случайный Ник") : _(L"随机尼克")), vars::misc::randomnick);
+						if (!vars::misc::randomnick) {
+							u_elements::writebox(language == 0 ? _(L"Nick") : (language == 1 ? _(L"Ник") : _(L"尼克")), 0, vars::misc::nick);
+						}
+					}
+
+					u_elements::checkbox(language == 0 ? _(L"No Player Collision") : (language == 1 ? _(L"Проходить Сквозь Людей") : _(L"没有玩家碰撞")), vars::misc::no_playercollision);
+					u_elements::checkbox(language == 0 ? _(L"No Water Collision") : (language == 1 ? _(L"Ходить По Воде") : _(L"没有水碰撞")), vars::misc::no_watercollision);
+					u_elements::checkbox(language == 0 ? _(L"No Tree Collision") : (language == 1 ? _(L"Проходить Сквозь Деревья") : _(L"没有树碰撞")), vars::misc::no_treecollision);
+					u_elements::checkbox(language == 0 ? _(L"Glass On Hit") : (language == 1 ? _(L"Стекло При Попадании") : _(L"击中玻璃")), vars::weapon::hit_material);
+					u_elements::checkbox(language == 0 ? _(L"AntiFlyKick") : (language == 1 ? _(L"Анти Кик Флайхака") : _(L"反飞踢")), vars::antihack::antiflykick);
+					u_elements::checkbox(language == 0 ? _(L"Anti InsideTerrain Kick") : (language == 1 ? _(L"Анти Кик Барьер") : _(L"反内地形踢")), vars::antihack::anti_inside_terrain);
+
+					u_elements::checkbox(language == 0 ? _(L"Aspect Ratio") : (language == 1 ? _(L"Сдвиг Экрана") : _(L"纵横比")), vars::misc::ratio_changer);
+					if (vars::misc::ratio_changer) {
+						u_elements::slider(language == 0 ? _(L"Ratio") : (language == 1 ? _(L"Сдвиг") : _(L"比率")), &vars::misc::ratio_amount, 0.1f, 5.f, 13);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Player FOV") : (language == 1 ? _(L"Кастомный Фов") : _(L"玩家FOV")), vars::misc::fov_changer);
+					if (vars::misc::fov_changer) {
+						u_elements::slider(language == 0 ? _(L"FOV") : (language == 1 ? _(L"Размер Фова") : _(L"FOV")), &vars::misc::fov_amount, 30, 150, 14);
+						u_elements::checkbox(language == 0 ? _(L"Zoom Key") : (language == 1 ? _(L"Кнопка Приближения") : _(L"缩放键")), vars::localplayer::zoom, vars::localplayer::zoomkey);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Remove Bob") : (language == 1 ? _(L"Убрать Покачивание Оружия") : _(L"删除鲍勃")), vars::weapon::no_bob);
+					u_elements::checkbox(language == 0 ? _(L"Remove Lower") : (language == 1 ? _(L"Убрать Сдвиг Оружия Вниз") : _(L"删除较低")), vars::weapon::no_lower);
+					u_elements::checkbox(language == 0 ? _(L"Remove Sway") : (language == 1 ? _(L"Убрать Взмах Оружия") : _(L"消除摇摆")), vars::weapon::no_sway);
+					u_elements::checkbox(language == 0 ? _(L"Chat Spammer") : (language == 1 ? _(L"Спамер В Чат") : _(L"聊天垃圾邮件")), vars::misc::chat_spammer, vars::misc::chat_spammer_key);
+					if (vars::misc::chat_spammer) {
+						u_elements::slider(language == 0 ? _(L"Spam Delay") : (language == 1 ? _(L"Задержка Спама") : _(L"垃圾邮件延迟")), &vars::misc::chat_spammer_delay, 0.1f, 10.f, 34);
+					}
+				}
+				u_elements::endchild(language == 0 ? _(L"OTHER") : (language == 1 ? _(L"ПРОЧЕЕ") : _(L"其他")), { 250 + 250 + 15 + 5 + 5, 31 }, { 250,450 }, 8);
+				break;
+			case 3:
+				u_elements::beginchild(language == 0 ? _(L"RESOURCE") : (language == 1 ? _(L"РЕСУРСЫ") : _(L"资源")), { 15, 31 }, { 250,450 }, 9); {
+					u_elements::checkbox(language == 0 ? _(L"Show Ore Distance") : (language == 1 ? _(L"Видеть Дистанцию Камней") : _(L"显示矿石距离")), vars::object::show_ores_distance);
+					u_elements::checkbox(language == 0 ? _(L"Show Ore Ico") : (language == 1 ? _(L"Видеть Иконку Камней") : _(L"显示矿石图标")), vars::object::show_ores_ico);
+					u_elements::slider(language == 0 ? _(L"Max Ore Distance") : (language == 1 ? _(L"Максимальная Дистанция Камней") : _(L"最大矿石距离")), &vars::object::max_ores_distance, 0, 778, 23);
+					{
+						String show_ores[] = { language == 0 ? _(L"Sulfur Ore") : (language == 1 ? _(L"Сера") : _(L"硫矿石")),
+							language == 0 ? _(L"mini Sulfur Ore") : (language == 1 ? _(L"Маленькая Сера") : _(L"迷你硫矿")),
+							language == 0 ? _(L"Metal Ore") : (language == 1 ? _(L"Металл") : _(L"金属矿石")),
+							language == 0 ? _(L"mini Metal Ore") : (language == 1 ? _(L"Маленький Металл") : _(L"迷你金属矿石")),
+							language == 0 ? _(L"Stone Ore") : (language == 1 ? _(L"Камень") : _(L"石矿")),
+							language == 0 ? _(L"mini Stone Ore") : (language == 1 ? _(L"Маленький Камень") : _(L"迷你石矿")), };
+						u_elements::multicombobox(language == 0 ? _(L"Show Ore's") : (language == 1 ? _(L"Видеть Камень") : _(L"显示矿石的")), vars::object::ores, show_ores, 6, 0);
+					}
+
+					u_elements::checkbox(language == 0 ? _(L"Show Berry Distance") : (language == 1 ? _(L"Видеть Дистанцию Ягод") : _(L"显示浆果距离")), vars::object::show_berrys_distance);
+					u_elements::checkbox(language == 0 ? _(L"Show Berry Ico") : (language == 1 ? _(L"Видеть Иконки Ягод") : _(L"显示浆果图标")), vars::object::show_berrys_ico);
+					u_elements::slider(language == 0 ? _(L"Max Berry Distance") : (language == 1 ? _(L"Максимальная Дистанция Ягод") : _(L"最大浆果距离")), &vars::object::max_berrys_distance, 0, 778, 24);
+					{
+						String show_berrys[] = { language == 0 ? _(L"Blue Berry") : (language == 1 ? _(L"Синие Ягоды") : _(L"蓝浆果")),
+							language == 0 ? _(L"Yellow Berry") : (language == 1 ? _(L"Жёлтые Ягоды") : _(L"黄浆果")),
+							language == 0 ? _(L"Red Berry") : (language == 1 ? _(L"Красные Ягоды") : _(L"红浆果")),
+							language == 0 ? _(L"Green Berry") : (language == 1 ? _(L"Зелёные Ягоды") : _(L"绿浆果")),
+							language == 0 ? _(L"Black Berry") : (language == 1 ? _(L"Чёрные Ягоды") : _(L"黑浆果")),
+							language == 0 ? _(L"White Berry") : (language == 1 ? _(L"Белые Ягоды") : _(L"白浆果")) };
+						u_elements::multicombobox(language == 0 ? _(L"Show Berry's") : (language == 1 ? _(L"Видеть Ягоды") : _(L"展示贝瑞的")), vars::object::berrys, show_berrys, 6, 1);
+					}
+
+					u_elements::checkbox(language == 0 ? _(L"Show Other Distance") : (language == 1 ? _(L"Видеть Дистанцию Прочего") : _(L"显示其他距离")), vars::object::show_others_distance);
+					u_elements::checkbox(language == 0 ? _(L"Show Other Ico") : (language == 1 ? _(L"Видеть Иконки Прочего") : _(L"显示其他图标")), vars::object::show_others_ico);
+					u_elements::slider(language == 0 ? _(L"Max Other Distance") : (language == 1 ? _(L"Максимальная Дистанция Прочего") : _(L"最大其他距离")), &vars::object::max_others_distance, 0, 778, 25);
+					{
+						String show_others[] = { language == 0 ? _(L"Hemp") : (language == 1 ? _(L"Конопля") : _(L"大麻")),
+							language == 0 ? _(L"Corn") : (language == 1 ? _(L"Кукуруза") : _(L"玉米")),
+							language == 0 ? _(L"Potato") : (language == 1 ? _(L"Картофель") : _(L"马铃薯")),
+							language == 0 ? _(L"Pumpkin") : (language == 1 ? _(L"Тыква") : _(L"南瓜")),
+							language == 0 ? _(L"Mushroom") : (language == 1 ? _(L"Гриб") : _(L"蘑菇")),
+							language == 0 ? _(L"Diesel") : (language == 1 ? _(L"Дизель") : _(L"柴油")) };
+						u_elements::multicombobox(language == 0 ? _(L"Show Other's") : (language == 1 ? _(L"Видеть Прочее") : _(L"显示其他的")), vars::object::others, show_others, 6, 2);
+					}
+				}
+				u_elements::endchild(language == 0 ? _(L"RESOURCE") : (language == 1 ? _(L"РЕСУРСЫ") : _(L"资源")), { 15, 31 }, { 250,450 }, 9);
+				u_elements::beginchild(language == 0 ? _(L"OBJECTS") : (language == 1 ? _(L"ОБЪЕКТЫ") : _(L"对象")), { 250 + 15 + 5, 31 }, { 250,450 }, 10); {
+
+					u_elements::checkbox(language == 0 ? _(L"Show Vehicle Distance") : (language == 1 ? _(L"Видеть Дистанцию Транспорта") : _(L"显示车辆距离")), vars::object::show_vehicles_distance);
+					u_elements::slider(language == 0 ? _(L"Max Vehicle Distance") : (language == 1 ? _(L"Максимальная Дистанция Транспорта") : _(L"最大车辆距离")), &vars::object::max_vehicles_distance, 0, 778, 26);
+					{
+						String show_vehicles[] = { language == 0 ? _(L"Mini Copter") : (language == 1 ? _(L"Мини Коптер") : _(L"迷你直升机")),
+							language == 0 ? _(L"Bradley") : (language == 1 ? _(L"Танк") : _(L"布拉德利")),
+							language == 0 ? _(L"Rowboat") : (language == 1 ? _(L"Гребная Лодка") : _(L"划艇,划艇")),
+							language == 0 ? _(L"Rhib") : (language == 1 ? _(L"Военная Лодка") : _(L"瑞布")),
+							language == 0 ? _(L"Scrap Helicopter") : (language == 1 ? _(L"Большой Вертолет") : _(L"报废直升机")),
+							language == 0 ? _(L"Patrol Helicopter") : (language == 1 ? _(L"Патрульный Вертолет") : _(L"巡逻直升机")) };
+						u_elements::multicombobox(language == 0 ? _(L"Show Vehicle's") : (language == 1 ? _(L"Видеть Транспорт") : _(L"展示车辆的")), vars::object::vehicles, show_vehicles, 6, 3);
+					}
+
+					u_elements::checkbox(language == 0 ? _(L"Show Trap Distance") : (language == 1 ? _(L"Видеть Дистанцию Ловушек") : _(L"显示陷阱距离")), vars::object::show_traps_distance);
+					u_elements::checkbox(language == 0 ? _(L"Show Trap Ico") : (language == 1 ? _(L"Видеть Иконки Ловушек") : _(L"显示陷阱图标")), vars::object::show_traps_ico);
+					u_elements::slider(language == 0 ? _(L"Max Trap Distance") : (language == 1 ? _(L"Максимальная Дистанция Ловушек") : _(L"最大陷阱距离")), &vars::object::max_traps_distance, 0, 778, 27);
+					{
+						String show_traps[] = { language == 0 ? _(L"Flame Turret") : (language == 1 ? _(L"Огнеметная Турель") : _(L"火焰炮塔")),
+							language == 0 ? _(L"Land Mine") : (language == 1 ? _(L"Наземная Мина") : _(L"地雷")),
+							language == 0 ? _(L"Sam Site") : (language == 1 ? _(L"ПВО") : _(L"山姆网站")),
+							language == 0 ? _(L"Shotgun Trap") : (language == 1 ? _(L"Ган Трап") : _(L"猎枪陷阱")),
+							language == 0 ? _(L"Bear Trap") : (language == 1 ? _(L"Медвежий Капкан") : _(L"熊陷阱")),
+							language == 0 ? _(L"Auto Turret") : (language == 1 ? _(L"Туррель") : _(L"自动转塔")) };
+						u_elements::multicombobox(language == 0 ? _(L"Show Trap's") : (language == 1 ? _(L"Видеть Ловушки") : _(L"显示陷阱")), vars::object::traps, show_traps, 6, 4);
+					}
+
+					u_elements::checkbox(language == 0 ? _(L"Show Animal Distance") : (language == 1 ? _(L"Видеть Дистанцию Животных") : _(L"显示动物距离")), vars::object::show_animals_distance);
+					u_elements::slider(language == 0 ? _(L"Max Animal Distance") : (language == 1 ? _(L"Максимальная Дистанция Животных") : _(L"最大动物距离")), &vars::object::max_animals_distance, 0, 778, 28);
+
+					{
+						String show_animals[] = { language == 0 ? _(L"Wolf") : (language == 1 ? _(L"Волк") : _(L"狼")),
+							language == 0 ? _(L"Boar") : (language == 1 ? _(L"Кабан") : _(L"野猪")),
+							language == 0 ? _(L"Bear") : (language == 1 ? _(L"Медведь") : _(L"熊")),
+							language == 0 ? _(L"Horse") : (language == 1 ? _(L"Лошадь") : _(L"马")) };
+						u_elements::multicombobox(language == 0 ? _(L"Show Animal's") : (language == 1 ? _(L"Видеть Животных") : _(L"展示动物的")), vars::object::animals, show_animals, 4, 5);
+					}
+
+					u_elements::checkbox(language == 0 ? _(L"Show Crate Distance") : (language == 1 ? _(L"Видеть Дистанцию Ящиков") : _(L"显示板条箱距离")), vars::object::show_crates_distance);
+					u_elements::slider(language == 0 ? _(L"Max Crate Distance") : (language == 1 ? _(L"Максимальная Дистанция Ящиков") : _(L"最大板条箱距离")), &vars::object::max_crates_distance, 0, 778, 29);
+					{
+						String show_crates[] = { language == 0 ? _(L"Elite Crate") : (language == 1 ? _(L"Элитный Ящик") : _(L"精英板条箱")),
+							language == 0 ? _(L"Basic Crate") : (language == 1 ? _(L"Обычный Ящик") : _(L"基本板条箱")),
+							language == 0 ? _(L"Military Crate") : (language == 1 ? _(L"Военный Ящик") : _(L"军用箱")),
+							language == 0 ? _(L"Normal Crate") : (language == 1 ? _(L"Средний Ящик") : _(L"普通板条箱")),
+							language == 0 ? _(L"Tool Crate") : (language == 1 ? _(L"Ящик С Инструментами") : _(L"工具箱")),
+							language == 0 ? _(L"Hackable Crate") : (language == 1 ? _(L"Ящик С Таймером") : _(L"可破解板条箱")) };
+						u_elements::multicombobox(language == 0 ? _(L"Show Crate's") : (language == 1 ? _(L"Видеть Ящики") : _(L"展示板条箱")), vars::object::crates, show_crates, 6, 6);
+					}
+				}
+				u_elements::endchild(language == 0 ? _(L"OBJECTS") : (language == 1 ? _(L"ОБЪЕКТЫ") : _(L"对象")), { 250 + 15 + 5, 31 }, { 250,450 }, 10);
+				u_elements::beginchild(language == 0 ? _(L"OTHER") : (language == 1 ? _(L"ПРОЧЕЕ") : _(L"其他")), { 250 + 250 + 15 + 5 + 5, 31 }, { 250,450 }, 11); {
+					u_elements::checkbox(language == 0 ? _(L"Show Home Object Distance") : (language == 1 ? _(L"Видеть Дистанцию Объектов Дома") : _(L"显示主对象距离")), vars::object::show_homeobjects_distance);
+					u_elements::checkbox(language == 0 ? _(L"Show Home Object Ico") : (language == 1 ? _(L"Видеть Иконки Объектов Дома") : _(L"显示主页对象图标")), vars::object::show_homeobjects_ico);
+					u_elements::slider(language == 0 ? _(L"Max Home Object Distance") : (language == 1 ? _(L"Максимальная Дистанция Объектов Дома") : _(L"最大主对象距离")), &vars::object::max_homeobjects_distance, 0, 778, 30);
+					{
+						String show_homeobjects[] = { language == 0 ? _(L"Tool Cupboard") : (language == 1 ? _(L"Шкаф") : _(L"工具柜")),
+							language == 0 ? _(L"Furnace") : (language == 1 ? _(L"Печь") : _(L"炉子")),
+							language == 0 ? _(L"Big Furnace") : (language == 1 ? _(L"Большая Печь") : _(L"大炉")),
+							language == 0 ? _(L"Bed") : (language == 1 ? _(L"Кровать") : _(L"床")),
+							language == 0 ? _(L"Large Wood Box") : (language == 1 ? _(L"Сундук") : _(L"大木箱")),
+							language == 0 ? _(L"Camp Fire") : (language == 1 ? _(L"Костёр") : _(L"营火")),
+							language == 0 ? _(L"Research Table") : (language == 1 ? _(L"Исследовательский Стол") : _(L"研究表")),
+							language == 0 ? _(L"Vending Machine") : (language == 1 ? _(L"Торговый Автомат") : _(L"自动售卖机")),
+							language == 0 ? _(L"Workbench Level 1") : (language == 1 ? _(L"Стол Изучения 1") : _(L"工作台等级1")),
+							language == 0 ? _(L"Workbench Level 2") : (language == 1 ? _(L"Стол Изучения 2") : _(L"工作台等级2")),
+							language == 0 ? _(L"Workbench Level 3") : (language == 1 ? _(L"Стол Изучения 3") : _(L"工作台等级3")) };
+						u_elements::multicombobox(language == 0 ? _(L"Show Home Object's") : (language == 1 ? _(L"Видеть Объекты Дома") : _(L"显示主页对象的")), vars::object::homeobjects, show_homeobjects, 11, 7);
+					}
+					u_elements::checkbox(language == 0 ? _(L"Show Main Object Distance") : (language == 1 ? _(L"Видеть Дистанцию Главных Объектов") : _(L"显示主对象距离")), vars::object::show_mainobjects_distance);
+					if (vars::object::mainobjects[2]) {
+						u_elements::checkbox(language == 0 ? _(L"Show Dropped Items Ico") : (language == 1 ? _(L"Показывать Иконки Упавших Предметов") : _(L"显示已删除的项目图标")), vars::object::show_dropeeditems_ico);
+					}
+					u_elements::slider(language == 0 ? _(L"Max Main Object Distance") : (language == 1 ? _(L"Максимальная Дистанция Главных Объектов") : _(L"最大主物体距离")), &vars::object::max_mainobjects_distance, 0, 778, 31);
+					{
+						String show_mainobjects[] = { /*language == 0 ? _(L"Stash") : (language == 1 ? _(L"Стэш") : _(L"藏匿处")),*/
+							language == 0 ? _(L"Corpse") : (language == 1 ? _(L"Трупы") : _(L"尸体")),
+							language == 0 ? _(L"BackPack") : (language == 1 ? _(L"Рюкзаки") : _(L"背包")),
+							language == 0 ? _(L"Dropped Items") : (language == 1 ? _(L"Выпавшие Предметы") : _(L"掉落的物品"))/*, (_(L"Treasures"))*/ };
+						u_elements::multicombobox(language == 0 ? _(L"Show Main Object's") : (language == 1 ? _(L"Видеть Главные Объекты") : _(L"显示主要对象的")), vars::object::mainobjects, show_mainobjects, 3, 8);
+					}
+
+					//u_elements::checkbox(language == 0 ? _(L"Debug") : (language == 1 ? _(L"Дэбаг") : _(L"调试/调试")), vars::object::debug);
+				}
+				u_elements::endchild(language == 0 ? _(L"OTHER") : (language == 1 ? _(L"ПРОЧЕЕ") : _(L"其他")), { 250 + 250 + 15 + 5 + 5, 31 }, { 250,450 }, 11);
+				break;
+			case 4:
+				u_elements::beginchild(language == 0 ? _(L"MENU") : (language == 1 ? _(L"МЕНЮ") : _(L"菜单")), { 15, 31 }, { 250,450 }, 9); {
+					{
+						String lang[] = { (_(L"English")), (_(L"Русский")), (_(L"中文")) };
+						u_elements::combobox(language == 0 ? _(L"Language") : (language == 1 ? _(L"Язык") : _(L"语言")), language, lang, 3, 4);
+					}
+					
+					u_elements::checkbox(language == 0 ? _(L"Unload Cheat") : (language == 1 ? _(L"Выгрузить Чит") : _(L"卸载作弊")), vars::misc::unload_cheat);
+				}
+				u_elements::endchild(language == 0 ? _(L"MENU") : (language == 1 ? _(L"МЕНЮ") : _(L"菜单")), { 15, 31 }, { 250,450 }, 9);
+				u_elements::beginchild(language == 0 ? _(L"CONFIG LIST") : (language == 1 ? _(L"КОНФИГ ЛИСТ") : _(L"视觉效果")), { 250 + 15 + 5, 31 }, { 250,450 }, 10); {
+					
+					if (!g_list_loaded) {
+						crash_logger::log_info("Loading config list for the first time");
+						config::get_config_list(&g_cfg_list);
+						g_list_loaded = true;
+						crash_logger::log_info("Config list loaded, count: %d", g_cfg_list.count);
+					}
+					
+				
+					static bool refresh_list = false;
+					u_elements::checkbox(language == 0 ? _(L"[REFRESH] Update Config List") : (language == 1 ? _(L"[ОБНОВИТЬ] Обновить Список") : _(L"[刷新]更新列表")), refresh_list);
+					if (refresh_list) {
+						crash_logger::log_info("Refreshing config list");
+						g_cfg_list.count = 0;
+						config::get_config_list(&g_cfg_list);
+						g_list_loaded = true;
+						refresh_list = false;
+						crash_logger::log_info("Config list refreshed, count: %d", g_cfg_list.count);
+					}
+					
+					
+					if (g_list_loaded && g_cfg_list.count > 0 && g_cfg_list.count <= 32) {
+						for (int i = 0; i < g_cfg_list.count; i++) {
+							
+							if (g_cfg_list.names[i][0] == L'\0') {
+								crash_logger::log_error("Empty config name at index %d, skipping", i);
+								continue;
+							}
+							
+							
+							wchar_t button_text[300];
+							int pos = 0;
+							
+						
+							const wchar_t* prefix = language == 0 ? L"[LOAD] " : (language == 1 ? L"[ЗАГРУЗИТЬ] " : L"[加载] ");
+							int j = 0;
+							while (prefix[j] != L'\0' && pos < 250) {
+								button_text[pos++] = prefix[j++];
+							}
+							
+							
+							j = 0;
+							while (g_cfg_list.names[i][j] != L'\0' && j < 256 && pos < 298) {
+								button_text[pos++] = g_cfg_list.names[i][j++];
+							}
+							button_text[pos] = L'\0';
+							
+						
+							u_elements::checkbox(button_text, g_load_buttons[i]);
+							if (g_load_buttons[i]) {
+								crash_logger::log_info("Loading config from list: %ls", g_cfg_list.names[i]);
+								bool result = config::load_config(g_cfg_list.names[i]);
+								crash_logger::log_info("Config load result: %d", result);
+								g_load_buttons[i] = false;
+							}
+						}
+					}
+				}
+				u_elements::endchild(language == 0 ? _(L"CONFIG LIST") : (language == 1 ? _(L"КОНФИГ ЛИСТ") : _(L"视觉效果")), { 250 + 15 + 5, 31 }, { 250,450 }, 10);
+				u_elements::beginchild(language == 0 ? _(L"CFG") : (language == 1 ? _(L"КФГ") : _(L"配置,配置")), { 250 + 250 + 15 + 5 + 5, 31 }, { 250,450 }, 11); {
+				
+					static wchar_t cfg_name[256] = L"myconfig";
+					u_elements::writebox(language == 0 ? _(L"Config Name") : (language == 1 ? _(L"Имя Конфига") : _(L"配置名称")), 100, cfg_name);
+					
+					static bool save_btn = false;
+					u_elements::checkbox(language == 0 ? _(L"SAVE Config") : (language == 1 ? _(L"СОХРАНИТЬ Конфиг") : _(L"保存配置")), save_btn);
+					if (save_btn) {
+						crash_logger::log_info("Save button clicked, config name: %ls", cfg_name);
+						bool result = config::save_config(cfg_name);
+						if (result) {
+							crash_logger::log_info("Config saved successfully via menu");
+							MessageBoxW(nullptr, L"Конфиг сохранён!", L"Success", MB_OK);
+						} else {
+							crash_logger::log_error("Config save failed via menu");
+							MessageBoxW(nullptr, L"Ошибка сохранения конфига!", L"Error", MB_OK | MB_ICONERROR);
+						}
+						save_btn = false;
+					}
+					
+					static bool load_btn = false;
+					u_elements::checkbox(language == 0 ? _(L"LOAD Config") : (language == 1 ? _(L"ЗАГРУЗИТЬ Конфиг") : _(L"加载配置")), load_btn);
+					if (load_btn) {
+						crash_logger::log_info("Load button clicked, loading config: %ls", cfg_name);
+						bool result = config::load_config(cfg_name);
+						crash_logger::log_info("Load config result: %d", result);
+						if (result) {
+							MessageBoxW(nullptr, L"Конфиг загружен!", L"Success", MB_OK);
+						} else {
+							MessageBoxW(nullptr, L"Ошибка загрузки конфига!", L"Error", MB_OK | MB_ICONERROR);
+						}
+						load_btn = false;
+					}
+					
+					static bool delete_btn = false;
+					u_elements::checkbox(language == 0 ? _(L"DELETE Config") : (language == 1 ? _(L"УДАЛИТЬ Конфиг") : _(L"删除配置")), delete_btn);
+					if (delete_btn) {
+						crash_logger::log_info("Delete button clicked, config name: %ls", cfg_name);
+						bool result = config::delete_config(cfg_name);
+						if (result) {
+							crash_logger::log_info("Config deleted successfully via menu");
+							MessageBoxW(nullptr, L"Конфиг удалён!", L"Success", MB_OK);
+							
+							g_cfg_list.count = 0;
+							config::get_config_list(&g_cfg_list);
+						} else {
+							crash_logger::log_error("Config delete failed via menu");
+							MessageBoxW(nullptr, L"Ошибка удаления конфига!", L"Error", MB_OK | MB_ICONERROR);
+						}
+						delete_btn = false;
+					}
+				}
+				u_elements::endchild(language == 0 ? _(L"CFG") : (language == 1 ? _(L"КФГ") : _(L"配置,配置")), { 250 + 250 + 15 + 5 + 5, 31 }, { 250,450 }, 11);
+
+
+				break;
+			}
+			u_elements::end_window();
+		}
+	}
+
+	return;
+}

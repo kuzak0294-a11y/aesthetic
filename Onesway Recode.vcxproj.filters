@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="entry.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="includes.hpp" />
+    <ClInclude Include="settings.hpp">
+      <Filter>main</Filter>
+    </ClInclude>
+    <ClInclude Include="il2cpp.hpp">
+      <Filter>main\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="memory.hpp">
+      <Filter>main\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="u_crt.hpp">
+      <Filter>main\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="xor.hpp">
+      <Filter>main\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="init_hooks.hpp">
+      <Filter>main\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="classes.hpp">
+      <Filter>main\game\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="enums.hpp">
+      <Filter>main\game\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="render.hpp">
+      <Filter>main\render</Filter>
+    </ClInclude>
+    <ClInclude Include="entity_loop.h">
+      <Filter>main\game\main</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix.h">
+      <Filter>main\game\main</Filter>
+    </ClInclude>
+    <ClInclude Include="o_dump_value.h">
+      <Filter>main\game\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="elements.h">
+      <Filter>main\render</Filter>
+    </ClInclude>
+    <ClInclude Include="menu.h">
+      <Filter>main\render</Filter>
+    </ClInclude>
+    <ClInclude Include="offsets.h" />
+    <ClInclude Include="OtherHook.hpp">
+      <Filter>main\hooks\all hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="BasePlayer.hpp">
+      <Filter>main\hooks\all hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.hpp">
+      <Filter>main\hooks\all hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="PerformanceUI.hpp">
+      <Filter>main\hooks\all hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerWalkMovement.hpp">
+      <Filter>main\hooks\all hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemIcon.hpp">
+      <Filter>main\hooks\all hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="manipulator.h">
+      <Filter>main\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="aim.h">
+      <Filter>main\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="antihack.h">
+      <Filter>main\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="set.h">
+      <Filter>main\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="bullettp.h">
+      <Filter>main\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="stw.h">
+      <Filter>main\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseMelee.hpp">
+      <Filter>main\hooks\all hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseProjectile.hpp">
+      <Filter>main\hooks\all hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectileShoot.hpp">
+      <Filter>main\hooks\all hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="other.h">
+      <Filter>main\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="SteamPlatform.hpp">
+      <Filter>main\hooks\all hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="math.hpp">
+      <Filter>main\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="co_dump_value.h">
+      <Filter>main\game\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="kill_effect.h" />
+    <ClInclude Include="anticheat_bypass.hpp" />
+    <ClInclude Include="config.hpp">
+      <Filter>main\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="crash_logger.hpp">
+      <Filter>main\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="chat_spammer.h" />
+    <ClInclude Include="visuals.h">
+      <Filter>main\functions</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="main">
+      <UniqueIdentifier>{14f220b7-2d79-44d5-970e-20e5fca55776}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main\hooks">
+      <UniqueIdentifier>{5059aab7-d1fa-4fea-8d8b-0f54caaf1672}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main\render">
+      <UniqueIdentifier>{64b8782a-e0b5-4e60-bade-8299a5c46d0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main\utils">
+      <UniqueIdentifier>{104e4228-8263-4aae-8b01-9200a0a0e4ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main\game">
+      <UniqueIdentifier>{02826700-72af-4b86-9146-6a41ad564d97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main\game\sdk">
+      <UniqueIdentifier>{be4d51f3-5e66-4d0f-8337-5c50b986f005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main\hooks\all hooks">
+      <UniqueIdentifier>{0c39df9f-6146-4a06-8f47-493892c6fc9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main\functions">
+      <UniqueIdentifier>{bce9ab2c-774a-4580-9584-7eed6f03ff34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main\game\main">
+      <UniqueIdentifier>{169d29b1-f2e9-4918-ad73-ea84fc062ffe}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

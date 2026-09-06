@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "steam2\\x64\\Release\\kill_effect.obj",
+            "outputs": [
+                "steam2\\x64\\Release\\kill_effect.h.obj.dt.module.json",
+                "steam2\\x64\\Release\\kill_effect.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}
