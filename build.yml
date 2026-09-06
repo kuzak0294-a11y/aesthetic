@@ -1,0 +1,23 @@
+name: Build DLL with MSBuild
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest # ОБЯЗАТЕЛЬНО виндовый сервер, где есть компилятор!
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Build Solution
+      run: msbuild "aesthetic dev.sln" /p:Configuration=Release /p:Platform=x64
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Compiled-DLL
+        path: x64/Release/*.dll

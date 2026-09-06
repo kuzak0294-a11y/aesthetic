@@ -163,7 +163,6 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <EntryPointSymbol>DllMain</EntryPointSymbol>
       <GenerateMapFile>false</GenerateMapFile>
       <MapExports>false</MapExports>
       <AssemblyDebug>false</AssemblyDebug>
